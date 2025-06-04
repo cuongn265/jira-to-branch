@@ -1,0 +1,45 @@
+{
+  "name": "jira-to-branch",
+  "version": "1.0.0",
+  "description": "🚀 Smart CLI tool to create Git branches from Jira tickets",
+  "main": "dist/index.js",
+  "bin": {
+    "jira-to-branch": "./dist/index.js",
+    "j2b": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "prepare": "npm run build",
+    "clean": "rm -rf dist",
+    "install-global": "npm run build && npm link"
+  },
+  "keywords": [
+    "jira",
+    "git",
+    "branch",
+    "cli",
+    "productivity",
+    "developer-tools",
+    "ai",
+    "openai"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.6",
+    "openai": "^4.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
