@@ -8,6 +8,10 @@ import { BranchNameGenerator } from './branch';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 
+// Import version from package.json
+const packageJson = require('../package.json');
+const version: string = packageJson.version;
+
 // Add chalk to display colored output
 const success = (msg: string) => console.log(chalk.green(`✓ ${msg}`));
 const error = (msg: string) => console.log(chalk.red(`✗ ${msg}`));
@@ -256,7 +260,7 @@ async function createBranch(input: string, options: any = {}) {
 program
   .name('jira-to-branch')
   .description('🚀 AI-powered CLI tool to create Git branches from Jira tickets')
-  .version('1.0.0');
+  .version(version);
 
 // Setup command
 program

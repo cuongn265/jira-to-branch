@@ -1,6 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import https from 'https';
 
+// Import version from package.json
+const packageJson = require('../package.json');
+const version: string = packageJson.version;
+
 interface JiraIssue {
   key: string;
   fields: {
@@ -61,7 +65,7 @@ export class JiraClient {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'User-Agent': 'jira-to-branch-cli/1.0.0'
+        'User-Agent': `jira-to-branch-cli/${version}`
       }
     });
   }
