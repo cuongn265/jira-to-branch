@@ -80,6 +80,19 @@ async function setup() {
         }
         return true;
       }
+    },
+    {
+      type: 'input',
+      name: 'model',
+      message: 'OpenAI model (optional, for AI-powered naming):',
+      default: config.model,
+      when: (answers: any) => answers.useAI,
+      validate: (input: string, answers: any) => {
+        if (answers.useAI && !input) {
+          return 'OpenAI model is required when AI is enabled';
+        }
+        return true;
+      }
     }
   ]);
 
@@ -176,7 +189,8 @@ async function createBranch(input: string, options: any = {}) {
       issue.fields.summary,
       issue.fields.description,
       options.prefix || config.defaultBranchPrefix,
-      config.useAI ? config.openaiApiKey : undefined
+      config.useAI ? config.openaiApiKey : undefined,
+      config.model
     );
 
     const aiType = (config.useAI && config.openaiApiKey) ? 'OpenAI' : 'Rule-based AI';

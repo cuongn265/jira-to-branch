@@ -43,12 +43,13 @@ export class BranchNameGenerator {
     summary: string,
     description?: string,
     prefix?: string,
-    openaiApiKey?: string
+    openaiApiKey?: string,
+    model?: string
   ): Promise<string> {
     // Try OpenAI first if API key is provided
     if (openaiApiKey) {
       try {
-        const aiService = new AIService(openaiApiKey);
+        const aiService = new AIService(openaiApiKey, model);
         const aiSummary = await aiService.generateBranchSummary(issueKey, summary, description);
 
         if (aiSummary) {
@@ -292,8 +293,6 @@ export class BranchNameGenerator {
       // Ensure it doesn't start with a dot (hidden files)
       .replace(/^\./, '')
       // Ensure it doesn't end with .lock
-      .replace(/\.lock$/, '')
-      // Convert to lowercase for consistency
-      .toLowerCase();
+      .replace(/\.lock$/, '');
   }
 }

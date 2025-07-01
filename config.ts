@@ -10,6 +10,7 @@ interface Config {
   defaultBranchPrefix?: string;
   openaiApiKey?: string;
   useAI?: boolean;
+  model?: string;
 }
 
 export class ConfigManager {

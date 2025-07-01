@@ -11,13 +11,15 @@ interface TicketAnalysis {
 export class AIService {
   private openai: OpenAI | null = null;
   private isEnabled: boolean = false;
+  private model: string = "gpt-3.5-turbo";
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, model?: string) {
     if (apiKey) {
       try {
         this.openai = new OpenAI({
           apiKey: apiKey,
         });
+        this.model = model || "gpt-3.5-turbo";
         this.isEnabled = true;
       } catch (error) {
         console.warn('Failed to initialize OpenAI client:', error);
@@ -35,7 +37,7 @@ export class AIService {
       const prompt = this.createAnalysisPrompt(issueKey, summary, description);
 
       const response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.model,
         messages: [
           {
             role: "system",
@@ -127,7 +129,7 @@ Return only the branch suffix (no ticket ID):
 `;
 
       const response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.model,
         messages: [
           {
             role: "system",
@@ -161,7 +163,7 @@ Return only the branch suffix (no ticket ID):
 
     try {
       await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.model,
         messages: [{ role: "user", content: "Hello" }],
         max_tokens: 5,
       });
