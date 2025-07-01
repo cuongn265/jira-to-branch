@@ -17,8 +17,8 @@ const warn = (msg: string) => console.log(chalk.yellow(`⚠ ${msg}`));
 async function ensureConfig(): Promise<any> {
   const config = await ConfigManager.load();
 
-  // Check if we have the minimum required config
-  if (!config.jiraHost || !config.jiraEmail || !config.jiraToken) {
+  // Check if we have the minimum required config (now includes OpenAI API key)
+  if (!config.jiraHost || !config.jiraEmail || !config.jiraToken || !config.openaiApiKey) {
     warn('Configuration incomplete. Let\'s set it up!');
     return await setup();
   }
@@ -57,29 +57,17 @@ async function setup() {
       validate: (input: string) => input.length > 0 || 'Jira API token is required'
     },
     {
+      type: 'password',
+      name: 'openaiApiKey',
+      message: 'OpenAI API key (required for AI-powered branch naming):',
+      default: config.openaiApiKey,
+      validate: (input: string) => input.length > 0 || 'OpenAI API key is required'
+    },
+    {
       type: 'input',
       name: 'defaultBranchPrefix',
       message: 'Default branch prefix (optional):',
       default: config.defaultBranchPrefix || ''
-    },
-    {
-      type: 'confirm',
-      name: 'useAI',
-      message: 'Enable OpenAI-powered branch generation?',
-      default: config.useAI || false
-    },
-    {
-      type: 'password',
-      name: 'openaiApiKey',
-      message: 'OpenAI API key (optional, for AI-powered naming):',
-      default: config.openaiApiKey,
-      when: (answers: any) => answers.useAI,
-      validate: (input: string, answers: any) => {
-        if (answers.useAI && !input) {
-          return 'OpenAI API key is required when AI is enabled';
-        }
-        return true;
-      }
     }
   ]);
 
@@ -136,7 +124,7 @@ function getCurrentBranch(): string {
 
 async function createBranch(input: string, options: any = {}) {
   try {
-    info('🚀 Starting branch creation process...\n');
+    info('🚀 Starting AI-powered branch creation...\n');
 
     // Validate Git repository
     checkGitRepository();
@@ -164,23 +152,17 @@ async function createBranch(input: string, options: any = {}) {
     console.log(`   Priority: ${chalk.white(issue.fields.priority?.name || 'Unknown')}`);
     console.log(`   Assignee: ${chalk.white(issue.fields.assignee?.displayName || 'Unassigned')}`);
 
-            // Generate branch name with AI analysis
-    if (config.useAI && config.openaiApiKey) {
-      info('🚀 Analyzing ticket content with OpenAI...');
-    } else {
-      info('🤖 Analyzing ticket content with rule-based AI...');
-    }
-
+    // Generate branch name with AI
+    info('🤖 Generating branch name with OpenAI...');
     const branchName = await BranchNameGenerator.generate(
       issueKey,
       issue.fields.summary,
       issue.fields.description,
       options.prefix || config.defaultBranchPrefix,
-      config.useAI ? config.openaiApiKey : undefined
+      config.openaiApiKey
     );
 
-    const aiType = (config.useAI && config.openaiApiKey) ? 'OpenAI' : 'Rule-based AI';
-    console.log(`\n   🌿 ${aiType}-generated branch: ${chalk.green(branchName)}`);
+    console.log(`\n   🌿 AI-generated branch: ${chalk.green(branchName)}`);
 
     // Confirm branch creation unless --yes flag is provided
     if (!options.yes) {
@@ -216,19 +198,19 @@ async function createBranch(input: string, options: any = {}) {
 // Define CLI program
 program
   .name('jira-to-branch')
-  .description('🚀 Smart CLI tool to create Git branches from Jira tickets')
+  .description('🚀 AI-powered CLI tool to create Git branches from Jira tickets')
   .version('1.0.0');
 
 // Setup command
 program
   .command('setup')
-  .description('Configure Jira credentials and preferences')
+  .description('Configure Jira credentials and OpenAI API key')
   .action(setup);
 
 // Main create command
 program
   .command('create <ticketIdOrUrl>')
-  .description('Create a new branch from Jira ticket ID or URL')
+  .description('Create a new branch from Jira ticket ID or URL using AI')
   .option('-p, --prefix <prefix>', 'Override default branch prefix')
   .option('-y, --yes', 'Skip confirmation prompt')
   .action(createBranch);
@@ -252,9 +234,8 @@ program
     console.log(`   Jira Host: ${config.jiraHost || 'Not set'}`);
     console.log(`   Jira Email: ${config.jiraEmail || 'Not set'}`);
     console.log(`   Jira Token: ${config.jiraToken ? '***' + config.jiraToken.slice(-4) : 'Not set'}`);
-    console.log(`   Default Prefix: ${config.defaultBranchPrefix || 'Not set'}`);
-    console.log(`   AI Enabled: ${config.useAI ? 'Yes' : 'No'}`);
     console.log(`   OpenAI Key: ${config.openaiApiKey ? '***' + config.openaiApiKey.slice(-4) : 'Not set'}`);
+    console.log(`   Default Prefix: ${config.defaultBranchPrefix || 'Not set'}`);
     console.log('');
   });
 

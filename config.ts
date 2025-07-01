@@ -9,7 +9,6 @@ interface Config {
   githubToken?: string;
   defaultBranchPrefix?: string;
   openaiApiKey?: string;
-  useAI?: boolean;
 }
 
 export class ConfigManager {

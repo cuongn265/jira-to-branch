@@ -1,7 +1,7 @@
 {
   "name": "jira-to-branch",
   "version": "1.0.0",
-  "description": "🚀 Smart CLI tool to create Git branches from Jira tickets",
+  "description": "🚀 AI-powered CLI tool to create Git branches from Jira tickets",
   "main": "dist/index.js",
   "bin": {
     "jira-to-branch": "./dist/index.js",

@@ -1,11 +1,10 @@
 # 🚀 Jira to Branch CLI
 
-A smart CLI tool that creates meaningful Git branches from Jira tickets using AI-powered branch name generation.
+An AI-powered CLI tool that creates meaningful Git branches from Jira tickets using OpenAI's advanced language models.
 
 ## ✨ Features
 
 - **🚀 OpenAI-Powered Generation**: Advanced AI analysis using OpenAI GPT-3.5-turbo for superior branch names
-- **🤖 Intelligent Fallback**: Sophisticated rule-based AI logic when OpenAI is unavailable
 - **📊 Multiple Input Formats**: Supports ticket IDs, browse URLs, and project URLs
 - **🎯 Smart Analysis**: Deep understanding of technical context and business requirements
 - **⚡ Git Integration**: Automatically creates and switches to new branches
@@ -39,7 +38,7 @@ npm link
 
 ## 🛠️ Setup
 
-Before using the tool, configure your Jira credentials:
+Before using the tool, configure your credentials:
 
 ```bash
 jira-to-branch setup
@@ -49,9 +48,8 @@ You'll be prompted for:
 - **Jira Host**: Your Jira instance (e.g., `company.atlassian.net`)
 - **Jira Email**: Your Jira account email
 - **Jira API Token**: Generate one at https://id.atlassian.com/manage-profile/security/api-tokens
+- **OpenAI API Key**: Get one at https://platform.openai.com/api-keys (required)
 - **Default Branch Prefix**: Optional prefix for branches (e.g., `feature`, `bugfix`)
-- **Enable OpenAI**: Choose whether to use OpenAI for advanced branch generation
-- **OpenAI API Key**: Get one at https://platform.openai.com/api-keys (optional but recommended)
 
 ## 🚀 Usage
 
@@ -95,39 +93,29 @@ jira-to-branch --help
 
 ## 🌿 Branch Name Format
 
-The tool generates branches in the format: `<ticket-id-lowercase>-<generative-branch-name>`
+The tool generates branches in the format: `<ticket-id-lowercase>-<ai-generated-summary>`
 
 ### Examples:
-- `EH-1234` + "Fix user authentication bug" → `EH-1234-fix-auth-bug`
-- `PROJ-567` + "Add payment integration API" → `PROJ-567-add-payment-api`
-- `BUG-89` + "Update database schema for users" → `BUG-89-update-user-schema`
+- `EH-1234` + "Fix user authentication bug" → `eh-1234-fix-auth-bug`
+- `PROJ-567` + "Add payment integration API" → `proj-567-add-payment-api`
+- `BUG-89` + "Update database schema for users" → `bug-89-update-user-schema`
 
-### 🚀 OpenAI-Powered Features:
+### 🚀 AI-Powered Features:
 - **🧠 Deep Context Understanding**: Analyzes technical and business context using GPT-3.5-turbo
 - **🎯 Intelligent Action Detection**: Identifies primary intent and priority
 - **🔍 Semantic Analysis**: Understanding beyond keywords with natural language processing
 - **📊 Smart Prioritization**: AI-driven relevance scoring for optimal branch names
-- **🎨 JSON-Structured Analysis**: Structured response with reasoning and context categorization
-
-### 🤖 Rule-Based Fallback (Advanced AI Logic):
-- **Smart Tokenization**: Intelligent text processing with stop word filtering
-- **Action Word Recognition**: Prioritizes verbs like "fix", "add", "update", "create"
-- **Technical Term Prioritization**: Boosts scoring for API, database, component terms
-- **Entity Extraction**: Identifies important business and technical entities
-- **Context-Aware Ranking**: Multi-factor scoring system for relevance
-- **Length Optimization**: Keeps branches concise but meaningful (max 50 characters)
+- **🎨 Structured Analysis**: Clear reasoning and context categorization
 
 ## 🎯 Workflow
 
 1. **Input Processing**: Accepts Jira ticket ID or URL with format validation
 2. **Repository Validation**: Ensures command is run within a Git repository
-3. **Configuration Check**: Loads or prompts for required Jira credentials
+3. **Configuration Check**: Loads or prompts for required credentials (Jira + OpenAI)
 4. **Ticket Fetching**: Retrieves comprehensive ticket information from Jira API
 5. **Rich Display**: Shows detailed ticket information (title, type, status, priority, assignee)
-6. **AI Analysis**:
-   - 🚀 **OpenAI Mode**: GPT-3.5-turbo semantic analysis with structured JSON response
-   - 🤖 **Fallback Mode**: Advanced rule-based AI with intelligent keyword extraction
-7. **Branch Generation**: Creates concise, meaningful branch names with reasoning
+6. **AI Analysis**: GPT-3.5-turbo semantic analysis for intelligent branch naming
+7. **Branch Generation**: Creates concise, meaningful branch names with AI reasoning
 8. **User Confirmation**: Shows current branch and prompts for confirmation (unless `--yes`)
 9. **Git Integration**: Creates and switches to the new branch
 10. **Success Feedback**: Confirms successful branch creation
@@ -148,9 +136,8 @@ Configuration is stored in `~/.jira-to-branch.json`:
   "jiraHost": "company.atlassian.net",
   "jiraEmail": "your-email@company.com",
   "jiraToken": "your-api-token",
-  "defaultBranchPrefix": "feature",
-  "useAI": true,
-  "openaiApiKey": "sk-..."
+  "openaiApiKey": "sk-...",
+  "defaultBranchPrefix": "feature"
 }
 ```
 
@@ -207,14 +194,11 @@ The tool provides detailed error messages and status updates for troubleshooting
 - **TypeScript**: Type-safe development
 
 ### AI Analysis Process
-1. **OpenAI Path**: Uses GPT-3.5-turbo with structured prompts for semantic analysis
-2. **Fallback Path**: Advanced rule-based analysis with:
-   - Tokenization and stop word filtering
-   - Action word extraction and prioritization
-   - Technical term identification
-   - Entity recognition
-   - Multi-factor relevance scoring
-   - Intelligent name generation
+Uses OpenAI GPT-3.5-turbo with structured prompts for semantic analysis:
+- Analyzes ticket summary and description
+- Identifies primary actions and technical context
+- Generates concise, meaningful branch names
+- Ensures proper formatting and length constraints
 
 ### Branch Name Constraints
 - Maximum 50 characters total
@@ -240,9 +224,9 @@ MIT License - see LICENSE file for details.
 ### Real-world Usage:
 
 ```bash
-# OpenAI-powered generation
+# AI-powered generation
 $ jira-to-branch create AUTH-123
-🚀 Starting branch creation process...
+🚀 Starting AI-powered branch creation...
 
 ℹ Detected Jira ticket: AUTH-123
 ℹ Connecting to Jira...
@@ -255,18 +239,18 @@ $ jira-to-branch create AUTH-123
    Priority: High
    Assignee: John Doe
 
-ℹ 🚀 Analyzing ticket content with OpenAI...
+ℹ 🤖 Generating branch name with OpenAI...
 
-   🌿 OpenAI-generated branch: AUTH-123-fix-oauth-token-refresh
+   🌿 AI-generated branch: auth-123-fix-oauth-token-refresh
 
    📍 Current branch: main
 ? Create and switch to this branch? Yes
 ℹ Creating new branch...
-✓ Successfully created and switched to branch: AUTH-123-fix-oauth-token-refresh
+✓ Successfully created and switched to branch: auth-123-fix-oauth-token-refresh
 
-# Rule-based fallback
+# Skip confirmation with --yes
 $ jira-to-branch create FEAT-456 --yes
-🚀 Starting branch creation process...
+🚀 Starting AI-powered branch creation...
 
 ℹ Detected Jira ticket: FEAT-456
 ℹ Connecting to Jira...
@@ -279,16 +263,16 @@ $ jira-to-branch create FEAT-456 --yes
    Priority: Medium
    Assignee: Jane Smith
 
-ℹ 🤖 Analyzing ticket content with rule-based AI...
+ℹ 🤖 Generating branch name with OpenAI...
 
-   🌿 Rule-based AI-generated branch: FEAT-456-implement-payment-gateway
+   🌿 AI-generated branch: feat-456-implement-payment-gateway
 
 ℹ Creating new branch...
-✓ Successfully created and switched to branch: FEAT-456-implement-payment-gateway
+✓ Successfully created and switched to branch: feat-456-implement-payment-gateway
 
 # With custom prefix
 $ jira-to-branch create PERF-789 --prefix hotfix
-🚀 Starting branch creation process...
+🚀 Starting AI-powered branch creation...
 
 📋 Ticket Information:
    Title: Optimize database query performance for user dashboard
@@ -297,7 +281,7 @@ $ jira-to-branch create PERF-789 --prefix hotfix
    Priority: High
    Assignee: Bob Wilson
 
-   🌿 OpenAI-generated branch: hotfix/PERF-789-optimize-db-query-performance
+   🌿 AI-generated branch: hotfix/perf-789-optimize-db-query-performance
 ```
 
 ---
