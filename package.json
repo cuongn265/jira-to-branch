@@ -4,8 +4,8 @@
   "description": "🚀 AI-powered CLI tool to create Git branches from Jira tickets",
   "main": "dist/index.js",
   "bin": {
-    "jira-to-branch": "./dist/index.js",
-    "j2b": "./dist/index.js"
+    "jira-to-branch": "dist/index.js",
+    "j2b": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
