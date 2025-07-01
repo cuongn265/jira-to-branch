@@ -49,7 +49,7 @@ export class AIService {
           }
         ],
         temperature: 0.3,
-        max_tokens: 500,
+        max_completion_tokens: 500,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -141,7 +141,7 @@ Return only the branch suffix (no ticket ID):
           }
         ],
         temperature: 0.2,
-        max_tokens: 50,
+        max_completion_tokens: 50,
       });
 
       const content = response.choices[0]?.message?.content?.trim();
@@ -165,7 +165,7 @@ Return only the branch suffix (no ticket ID):
       await this.openai.chat.completions.create({
         model: this.model,
         messages: [{ role: "user", content: "Hello" }],
-        max_tokens: 5,
+        max_completion_tokens: 5,
       });
       return true;
     } catch {

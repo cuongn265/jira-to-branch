@@ -293,6 +293,8 @@ export class BranchNameGenerator {
       // Ensure it doesn't start with a dot (hidden files)
       .replace(/^\./, '')
       // Ensure it doesn't end with .lock
-      .replace(/\.lock$/, '');
+      .replace(/\.lock$/, '')
+      // Remove backticks (like `id` or `id`)
+      .replace(/`/g, '');
   }
 }
