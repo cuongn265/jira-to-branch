@@ -50,6 +50,9 @@ You'll be prompted for:
 - **Jira API Token**: Generate one at https://id.atlassian.com/manage-profile/security/api-tokens
 - **OpenAI API Key**: Get one at https://platform.openai.com/api-keys (required)
 - **Default Branch Prefix**: Optional prefix for branches (e.g., `feature`, `bugfix`)
+- **AI Model**: Choose from GPT-3.5-turbo, GPT-4, GPT-4o, etc.
+- **AI Temperature**: Controls randomness (0.0-1.0, lower = more consistent)
+- **AI Max Tokens**: Maximum tokens for AI analysis (1-4000)
 
 ## 🚀 Usage
 
@@ -73,18 +76,27 @@ jira-to-branch create EH-1234 --yes
 # Override branch prefix
 jira-to-branch create EH-1234 --prefix bugfix
 
+# Show detailed AI analysis
+jira-to-branch create EH-1234 --analysis
+
+# Combine options
+jira-to-branch create EH-1234 --analysis --prefix feature --yes
+
 # Quick branch command (alias)
 jira-to-branch branch EH-1234
 # or
 jira-to-branch b EH-1234
 ```
 
-### Other Commands
+### Configuration Commands
 ```bash
 # View current configuration
 jira-to-branch config
 
-# Reconfigure settings
+# Configure AI model settings
+jira-to-branch ai-config
+
+# Reconfigure all settings
 jira-to-branch setup
 
 # Get help
@@ -101,11 +113,27 @@ The tool generates branches in the format: `<ticket-id-lowercase>-<ai-generated-
 - `BUG-89` + "Update database schema for users" → `bug-89-update-user-schema`
 
 ### 🚀 AI-Powered Features:
-- **🧠 Deep Context Understanding**: Analyzes technical and business context using GPT-3.5-turbo
+- **🧠 Deep Context Understanding**: Analyzes technical and business context using configurable AI models
 - **🎯 Intelligent Action Detection**: Identifies primary intent and priority
 - **🔍 Semantic Analysis**: Understanding beyond keywords with natural language processing
 - **📊 Smart Prioritization**: AI-driven relevance scoring for optimal branch names
 - **🎨 Structured Analysis**: Clear reasoning and context categorization
+- **⚙️ Configurable Models**: Support for GPT-3.5-turbo, GPT-4, GPT-4o, and more
+- **🔧 Fine-tuning**: Adjustable temperature and token limits for optimal results
+
+### 🔍 Detailed AI Analysis
+
+Use the `--analysis` flag to see detailed AI reasoning:
+
+```bash
+jira-to-branch create EH-1234 --analysis
+```
+
+This provides:
+- **Primary Action**: Main action verb (fix, add, update, etc.)
+- **Technical Context**: Relevant technical terms and components
+- **Business Context**: Business-related terms and implications
+- **Reasoning**: AI's explanation for the chosen branch name
 
 ## 🎯 Workflow
 
@@ -137,9 +165,31 @@ Configuration is stored in `~/.jira-to-branch.json`:
   "jiraEmail": "your-email@company.com",
   "jiraToken": "your-api-token",
   "openaiApiKey": "sk-...",
-  "defaultBranchPrefix": "feature"
+  "defaultBranchPrefix": "feature",
+  "aiModel": "gpt-3.5-turbo",
+  "aiTemperature": 0.3,
+  "aiMaxTokens": 500
 }
 ```
+
+### AI Model Configuration
+
+Use the dedicated AI configuration command for fine-tuning:
+
+```bash
+jira-to-branch ai-config
+```
+
+**Available Models:**
+- `gpt-3.5-turbo` (recommended) - Fast and cost-effective
+- `gpt-4` - More accurate but slower and more expensive
+- `gpt-4-turbo-preview` - Latest GPT-4 with improved performance
+- `gpt-4o` - Optimized version of GPT-4
+- `gpt-4o-mini` - Smaller, faster version of GPT-4o
+
+**Configuration Options:**
+- **Temperature**: Controls creativity vs consistency (0.0 = deterministic, 1.0 = creative)
+- **Max Tokens**: Limits response length (higher = more detailed analysis)
 
 ## 🛡️ Security & Reliability
 
@@ -269,6 +319,30 @@ $ jira-to-branch create FEAT-456 --yes
 
 ℹ Creating new branch...
 ✓ Successfully created and switched to branch: feat-456-implement-payment-gateway
+
+# With detailed AI analysis
+$ jira-to-branch create API-321 --analysis
+🚀 Starting AI-powered branch creation...
+
+📋 Ticket Information:
+   Title: Implement user authentication API with JWT tokens
+   Type: Story
+   Status: To Do
+   Priority: High
+   Assignee: Alice Johnson
+
+ℹ 🤖 Generating branch name with OpenAI...
+
+   🌿 AI-generated branch: api-321-implement-user-auth-jwt
+
+🔍 AI Analysis:
+   Primary Action: implement
+   Technical Context: authentication, api, jwt, tokens
+   Business Context: user, security
+   Reasoning: Focuses on the primary action 'implement' and key technical components 'auth' and 'jwt' for a concise yet descriptive branch name
+
+? Create and switch to this branch? Yes
+✓ Successfully created and switched to branch: api-321-implement-user-auth-jwt
 
 # With custom prefix
 $ jira-to-branch create PERF-789 --prefix hotfix

@@ -68,6 +68,39 @@ async function setup() {
       name: 'defaultBranchPrefix',
       message: 'Default branch prefix (optional):',
       default: config.defaultBranchPrefix || ''
+    },
+    {
+      type: 'list',
+      name: 'aiModel',
+      message: 'AI model to use:',
+      choices: [
+        { name: 'GPT-3.5 Turbo (recommended)', value: 'gpt-3.5-turbo' },
+        { name: 'GPT-4', value: 'gpt-4' },
+        { name: 'GPT-4 Turbo', value: 'gpt-4-turbo-preview' },
+        { name: 'GPT-4o', value: 'gpt-4o' },
+        { name: 'GPT-4o Mini', value: 'gpt-4o-mini' }
+      ],
+      default: config.aiModel || 'gpt-3.5-turbo'
+    },
+    {
+      type: 'number',
+      name: 'aiTemperature',
+      message: 'AI temperature (0.0-1.0, lower = more consistent):',
+      default: config.aiTemperature || 0.3,
+      validate: (input: number) => {
+        if (input >= 0 && input <= 1) return true;
+        return 'Temperature must be between 0.0 and 1.0';
+      }
+    },
+    {
+      type: 'number',
+      name: 'aiMaxTokens',
+      message: 'AI max tokens for analysis:',
+      default: config.aiMaxTokens || 500,
+      validate: (input: number) => {
+        if (input > 0 && input <= 4000) return true;
+        return 'Max tokens must be between 1 and 4000';
+      }
     }
   ]);
 
@@ -154,15 +187,39 @@ async function createBranch(input: string, options: any = {}) {
 
     // Generate branch name with AI
     info('🤖 Generating branch name with OpenAI...');
-    const branchName = await BranchNameGenerator.generate(
-      issueKey,
-      issue.fields.summary,
-      issue.fields.description,
-      options.prefix || config.defaultBranchPrefix,
-      config.openaiApiKey
-    );
+
+    let branchName: string;
+    let analysis: any = null;
+
+    if (options.analysis) {
+      const result = await BranchNameGenerator.generateWithAnalysis(
+        issueKey,
+        issue.fields.summary,
+        issue.fields.description,
+        options.prefix || config.defaultBranchPrefix,
+        config.openaiApiKey
+      );
+      branchName = result.branchName;
+      analysis = result.analysis;
+    } else {
+      branchName = await BranchNameGenerator.generate(
+        issueKey,
+        issue.fields.summary,
+        issue.fields.description,
+        options.prefix || config.defaultBranchPrefix,
+        config.openaiApiKey
+      );
+    }
 
     console.log(`\n   🌿 AI-generated branch: ${chalk.green(branchName)}`);
+
+    if (analysis) {
+      console.log(`\n${chalk.cyan('🔍 AI Analysis:')}`);
+      console.log(`   Primary Action: ${chalk.white(analysis.primaryAction)}`);
+      console.log(`   Technical Context: ${chalk.white(analysis.technicalContext.join(', '))}`);
+      console.log(`   Business Context: ${chalk.white(analysis.businessContext.join(', '))}`);
+      console.log(`   Reasoning: ${chalk.white(analysis.reasoning)}`);
+    }
 
     // Confirm branch creation unless --yes flag is provided
     if (!options.yes) {
@@ -213,6 +270,7 @@ program
   .description('Create a new branch from Jira ticket ID or URL using AI')
   .option('-p, --prefix <prefix>', 'Override default branch prefix')
   .option('-y, --yes', 'Skip confirmation prompt')
+  .option('-a, --analysis', 'Show detailed AI analysis of the branch name')
   .action(createBranch);
 
 // Quick command (alias for create)
@@ -222,6 +280,7 @@ program
   .description('Quick alias for create command')
   .option('-p, --prefix <prefix>', 'Override default branch prefix')
   .option('-y, --yes', 'Skip confirmation prompt')
+  .option('-a, --analysis', 'Show detailed AI analysis of the branch name')
   .action(createBranch);
 
 // Show config command
@@ -230,12 +289,78 @@ program
   .description('Show current configuration')
   .action(async () => {
     const config = await ConfigManager.load();
+    const aiConfig = ConfigManager.getAIConfig(config);
+
     console.log('\n' + chalk.cyan('📋 Current Configuration:'));
+    console.log(chalk.yellow('  Jira Settings:'));
     console.log(`   Jira Host: ${config.jiraHost || 'Not set'}`);
     console.log(`   Jira Email: ${config.jiraEmail || 'Not set'}`);
     console.log(`   Jira Token: ${config.jiraToken ? '***' + config.jiraToken.slice(-4) : 'Not set'}`);
+
+    console.log(chalk.yellow('  AI Settings:'));
     console.log(`   OpenAI Key: ${config.openaiApiKey ? '***' + config.openaiApiKey.slice(-4) : 'Not set'}`);
+    console.log(`   Model: ${aiConfig.model}`);
+    console.log(`   Temperature: ${aiConfig.temperature}`);
+    console.log(`   Max Tokens: ${aiConfig.maxTokens}`);
+
+    console.log(chalk.yellow('  Branch Settings:'));
     console.log(`   Default Prefix: ${config.defaultBranchPrefix || 'Not set'}`);
+    console.log('');
+  });
+
+// AI config command
+program
+  .command('ai-config')
+  .description('Configure AI model settings')
+  .action(async () => {
+    const config = await ConfigManager.load();
+
+    const answers = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'aiModel',
+        message: 'AI model to use:',
+        choices: [
+          { name: 'GPT-3.5 Turbo (recommended)', value: 'gpt-3.5-turbo' },
+          { name: 'GPT-4', value: 'gpt-4' },
+          { name: 'GPT-4 Turbo', value: 'gpt-4-turbo-preview' },
+          { name: 'GPT-4o', value: 'gpt-4o' },
+          { name: 'GPT-4o Mini', value: 'gpt-4o-mini' }
+        ],
+        default: config.aiModel || 'gpt-3.5-turbo'
+      },
+      {
+        type: 'number',
+        name: 'aiTemperature',
+        message: 'AI temperature (0.0-1.0, lower = more consistent):',
+        default: config.aiTemperature || 0.3,
+        validate: (input: number) => {
+          if (input >= 0 && input <= 1) return true;
+          return 'Temperature must be between 0.0 and 1.0';
+        }
+      },
+      {
+        type: 'number',
+        name: 'aiMaxTokens',
+        message: 'AI max tokens for analysis:',
+        default: config.aiMaxTokens || 500,
+        validate: (input: number) => {
+          if (input > 0 && input <= 4000) return true;
+          return 'Max tokens must be between 1 and 4000';
+        }
+      }
+    ]);
+
+    const updatedConfig = { ...config, ...answers };
+    await ConfigManager.save(updatedConfig);
+    success('AI configuration updated successfully!\n');
+
+    // Show updated config
+    const aiConfig = ConfigManager.getAIConfig(updatedConfig);
+    console.log(chalk.cyan('🤖 Updated AI Configuration:'));
+    console.log(`   Model: ${aiConfig.model}`);
+    console.log(`   Temperature: ${aiConfig.temperature}`);
+    console.log(`   Max Tokens: ${aiConfig.maxTokens}`);
     console.log('');
   });
 

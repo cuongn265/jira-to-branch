@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { ConfigManager } from './config';
 
 interface TicketAnalysis {
   primaryAction: string;
@@ -8,11 +9,43 @@ interface TicketAnalysis {
   reasoning: string;
 }
 
+interface AIConfig {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  summaryMaxTokens: number;
+  summaryTemperature: number;
+}
+
 export class AIService {
   private openai: OpenAI | null = null;
   private isEnabled: boolean = false;
+  private aiConfig: AIConfig;
 
-  constructor(apiKey?: string) {
+  static async create(apiKey?: string, customConfig?: Partial<AIConfig>): Promise<AIService> {
+    const instance = new AIService();
+    await instance.initialize(apiKey, customConfig);
+    return instance;
+  }
+
+    constructor(apiKey?: string, customConfig?: Partial<AIConfig>) {
+    // Initialize with default config first
+    this.aiConfig = {
+      model: 'gpt-3.5-turbo',
+      temperature: 0.3,
+      maxTokens: 500,
+      summaryMaxTokens: 50,
+      summaryTemperature: 0.2,
+    };
+
+    // Apply custom config if provided
+    if (customConfig) {
+      this.aiConfig = {
+        ...this.aiConfig,
+        ...customConfig,
+      };
+    }
+
     if (apiKey) {
       try {
         this.openai = new OpenAI({
@@ -26,6 +59,45 @@ export class AIService {
     }
   }
 
+  private async initialize(apiKey?: string, customConfig?: Partial<AIConfig>): Promise<void> {
+    try {
+      // Load configuration from file
+      const config = await ConfigManager.load();
+      const fileAIConfig = ConfigManager.getAIConfig(config);
+
+      // Merge file config with custom config
+      this.aiConfig = {
+        ...fileAIConfig,
+        ...customConfig,
+      };
+    } catch (error) {
+      console.warn('Failed to load AI config from file, using defaults:', error);
+      // Keep the defaults set in constructor
+    }
+
+    if (apiKey) {
+      try {
+        this.openai = new OpenAI({
+          apiKey: apiKey,
+        });
+        this.isEnabled = true;
+      } catch (error) {
+        console.warn('Failed to initialize OpenAI client:', error);
+        this.isEnabled = false;
+      }
+    }
+  }
+
+  private async loadConfigFromFile(): Promise<AIConfig> {
+    try {
+      const config = await ConfigManager.load();
+      return ConfigManager.getAIConfig(config);
+    } catch (error) {
+      console.warn('Failed to load AI config from file, using current config:', error);
+      return this.aiConfig;
+    }
+  }
+
   async analyzeBranchName(issueKey: string, summary: string, description?: string): Promise<TicketAnalysis | null> {
     if (!this.isEnabled || !this.openai) {
       return null;
@@ -35,7 +107,7 @@ export class AIService {
       const prompt = this.createAnalysisPrompt(issueKey, summary, description);
 
       const response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.aiConfig.model,
         messages: [
           {
             role: "system",
@@ -46,8 +118,8 @@ export class AIService {
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 500,
+        temperature: this.aiConfig.temperature,
+        max_tokens: this.aiConfig.maxTokens,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -127,7 +199,7 @@ Return only the branch suffix (no ticket ID):
 `;
 
       const response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.aiConfig.model,
         messages: [
           {
             role: "system",
@@ -138,8 +210,8 @@ Return only the branch suffix (no ticket ID):
             content: prompt
           }
         ],
-        temperature: 0.2,
-        max_tokens: 50,
+        temperature: this.aiConfig.summaryTemperature,
+        max_tokens: this.aiConfig.summaryMaxTokens,
       });
 
       const content = response.choices[0]?.message?.content?.trim();
@@ -161,7 +233,7 @@ Return only the branch suffix (no ticket ID):
 
     try {
       await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: this.aiConfig.model,
         messages: [{ role: "user", content: "Hello" }],
         max_tokens: 5,
       });
@@ -169,5 +241,17 @@ Return only the branch suffix (no ticket ID):
     } catch {
       return false;
     }
+  }
+
+  // Getter methods for configuration access
+  getAIConfig(): AIConfig {
+    return { ...this.aiConfig };
+  }
+
+  updateConfig(newConfig: Partial<AIConfig>): void {
+    this.aiConfig = {
+      ...this.aiConfig,
+      ...newConfig,
+    };
   }
 }
