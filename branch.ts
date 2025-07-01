@@ -82,7 +82,7 @@ export class BranchNameGenerator {
     // Add prefix if provided
     const finalBranchName = prefix ? `${prefix}/${branchName}` : branchName;
 
-    return this.ensureValidLength(finalBranchName);
+    return this.ensureValidLength(this.sanitizeBranchName(finalBranchName));
   }
 
   private static analyzeTicketContent(summary: string, description?: string) {
