@@ -142,11 +142,11 @@ Ticket ID: ${issueKey}
 Summary: ${summary}
 Description: ${description || 'No description provided'}
 
-Create a branch name following this format: <ticket-id-lowercase>-<2-4-meaningful-words>
+Create a branch name following this format: <ticket-id>-<2-4-meaningful-words>
 
 Requirements:
 - Max 40 characters total
-- Use lowercase with hyphens
+- Preserve original ticket ID case, use lowercase with hyphens for the rest
 - Focus on the primary action and key technical terms
 - Avoid redundant words
 - Be specific but concise
@@ -166,7 +166,7 @@ For "Fix user authentication validation in login API endpoint":
   "primaryAction": "fix",
   "technicalContext": ["authentication", "validation", "api", "endpoint"],
   "businessContext": ["user", "login"],
-  "suggestedBranchName": "eh-1234-fix-auth-validation",
+  "suggestedBranchName": "EH-1234-fix-auth-validation",
   "reasoning": "Focuses on the primary action 'fix' and key technical components 'auth' and 'validation'"
 }
 `;

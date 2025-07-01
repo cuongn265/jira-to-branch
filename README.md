@@ -105,12 +105,12 @@ jira-to-branch --help
 
 ## 🌿 Branch Name Format
 
-The tool generates branches in the format: `<ticket-id-lowercase>-<ai-generated-summary>`
+The tool generates branches in the format: `<ticket-id>-<ai-generated-summary>`
 
 ### Examples:
-- `EH-1234` + "Fix user authentication bug" → `eh-1234-fix-auth-bug`
-- `PROJ-567` + "Add payment integration API" → `proj-567-add-payment-api`
-- `BUG-89` + "Update database schema for users" → `bug-89-update-user-schema`
+- `EH-1234` + "Fix user authentication bug" → `EH-1234-fix-auth-bug`
+- `PROJ-567` + "Add payment integration API" → `PROJ-567-add-payment-api`
+- `BUG-89` + "Update database schema for users" → `BUG-89-update-user-schema`
 
 ### 🚀 AI-Powered Features:
 - **🧠 Deep Context Understanding**: Analyzes technical and business context using configurable AI models
@@ -252,8 +252,8 @@ Uses OpenAI GPT-3.5-turbo with structured prompts for semantic analysis:
 
 ### Branch Name Constraints
 - Maximum 50 characters total
-- Lowercase with hyphens
-- Ticket ID prefix preserved
+- Ticket ID case preserved, suffix in lowercase with hyphens
+- Ticket ID prefix always preserved
 - Meaningful technical terms prioritized
 - Action words emphasized
 
@@ -291,12 +291,12 @@ $ jira-to-branch create AUTH-123
 
 ℹ 🤖 Generating branch name with OpenAI...
 
-   🌿 AI-generated branch: auth-123-fix-oauth-token-refresh
+   🌿 AI-generated branch: AUTH-123-fix-oauth-token-refresh
 
    📍 Current branch: main
 ? Create and switch to this branch? Yes
 ℹ Creating new branch...
-✓ Successfully created and switched to branch: auth-123-fix-oauth-token-refresh
+✓ Successfully created and switched to branch: AUTH-123-fix-oauth-token-refresh
 
 # Skip confirmation with --yes
 $ jira-to-branch create FEAT-456 --yes
@@ -315,10 +315,10 @@ $ jira-to-branch create FEAT-456 --yes
 
 ℹ 🤖 Generating branch name with OpenAI...
 
-   🌿 AI-generated branch: feat-456-implement-payment-gateway
+   🌿 AI-generated branch: FEAT-456-implement-payment-gateway
 
 ℹ Creating new branch...
-✓ Successfully created and switched to branch: feat-456-implement-payment-gateway
+✓ Successfully created and switched to branch: FEAT-456-implement-payment-gateway
 
 # With detailed AI analysis
 $ jira-to-branch create API-321 --analysis
@@ -333,7 +333,7 @@ $ jira-to-branch create API-321 --analysis
 
 ℹ 🤖 Generating branch name with OpenAI...
 
-   🌿 AI-generated branch: api-321-implement-user-auth-jwt
+   🌿 AI-generated branch: API-321-implement-user-auth-jwt
 
 🔍 AI Analysis:
    Primary Action: implement
@@ -342,7 +342,7 @@ $ jira-to-branch create API-321 --analysis
    Reasoning: Focuses on the primary action 'implement' and key technical components 'auth' and 'jwt' for a concise yet descriptive branch name
 
 ? Create and switch to this branch? Yes
-✓ Successfully created and switched to branch: api-321-implement-user-auth-jwt
+✓ Successfully created and switched to branch: API-321-implement-user-auth-jwt
 
 # With custom prefix
 $ jira-to-branch create PERF-789 --prefix hotfix
@@ -355,7 +355,7 @@ $ jira-to-branch create PERF-789 --prefix hotfix
    Priority: High
    Assignee: Bob Wilson
 
-   🌿 AI-generated branch: hotfix/perf-789-optimize-db-query-performance
+   🌿 AI-generated branch: hotfix/PERF-789-optimize-db-query-performance
 ```
 
 ---
