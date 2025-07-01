@@ -55,7 +55,7 @@ export class BranchNameGenerator {
           const ticketId = issueKey;
           const branchName = `${ticketId}-${aiSummary}`;
           const finalBranchName = prefix ? `${prefix}/${branchName}` : branchName;
-          return this.ensureValidLength(finalBranchName);
+          return this.ensureValidLength(this.sanitizeBranchName(finalBranchName));
         }
       } catch (error) {
         console.warn('OpenAI generation failed, falling back to rule-based logic');
@@ -279,5 +279,21 @@ export class BranchNameGenerator {
     const truncatedGenerative = generativePart.substring(0, maxGenerativeLength);
 
     return `${prefix}${ticketId}-${truncatedGenerative}`;
+  }
+
+  private static sanitizeBranchName(branchName: string): string {
+    return branchName
+      // Replace invalid characters with hyphens
+      .replace(/[^a-zA-Z0-9\-_\/]/g, '-')
+      // Replace multiple consecutive hyphens with single hyphen
+      .replace(/-+/g, '-')
+      // Remove leading/trailing hyphens and slashes
+      .replace(/^[-\/]+|[-\/]+$/g, '')
+      // Ensure it doesn't start with a dot (hidden files)
+      .replace(/^\./, '')
+      // Ensure it doesn't end with .lock
+      .replace(/\.lock$/, '')
+      // Convert to lowercase for consistency
+      .toLowerCase();
   }
 }
