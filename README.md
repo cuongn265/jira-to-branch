@@ -1,5 +1,10 @@
 # 🚀 Jira to Branch CLI
 
+[![npm version](https://img.shields.io/npm/v/jira-to-branch)](https://www.npmjs.com/package/jira-to-branch)
+[![GitHub release](https://img.shields.io/github/v/release/cuongn265/jira-to-branch)](https://github.com/cuongn265/jira-to-branch/releases)
+[![License](https://img.shields.io/npm/l/jira-to-branch)](https://github.com/cuongn265/jira-to-branch/blob/main/LICENSE)
+[![Node.js](https://img.shields.io/node/v/jira-to-branch)](https://nodejs.org)
+
 An AI-powered CLI tool that creates meaningful Git branches from Jira tickets using OpenAI's advanced language models.
 
 ## ✨ Features
