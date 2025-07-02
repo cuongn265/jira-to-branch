@@ -268,10 +268,11 @@ async function createPr() {
     await checkGitRepository();
     const currentBranch = getCurrentBranch();
 
-  const prTitle = await PullRequestGenerator.generate(config.openaiApiKey);
-  info(prTitle);
-
-    execSync(`gh pr create --title ${prTitle} --head ${currentBranch}`, { stdio: 'inherit' });
+    const prTitle = await PullRequestGenerator.generate(config.openaiApiKey);
+    execSync(`gh pr create --title "${prTitle}" --head ${currentBranch}`, { stdio: 'inherit' });
+    success(`Successfully created PR with title: ${prTitle}`);
+    info('Opening PR in browser...');
+    execSync(`gh pr view --web`, { stdio: 'inherit' });
 }
 
 function checkGitHubCLI(): boolean {

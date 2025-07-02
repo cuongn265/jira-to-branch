@@ -251,7 +251,6 @@ Requirements:
 Return only the PR title:
 `;
 
-      console.log(prompt);
       const response = await this.openai.chat.completions.create({
         model: this.aiConfig.model,
         messages: [
