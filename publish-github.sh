@@ -25,7 +25,7 @@ sed -i.tmp 's/"name": "jira-to-branch"/"name": "@cuongn265\/jira-to-branch"/' pa
 
 # Set up npm registry for GitHub Packages
 echo "⚙️ Configuring npm registry..."
-npm config set @cuongn265:registry https://npm.pkg.github.com/
+npm config set registry https://npm.pkg.github.com/
 npm config set //npm.pkg.github.com/:_authToken $GITHUB_TOKEN
 
 # Publish to GitHub Packages
@@ -39,7 +39,7 @@ rm -f package.json.tmp
 
 # Reset npm registry to default
 echo "🔧 Resetting npm registry..."
-npm config delete @cuongn265:registry
+npm config set registry https://registry.npmjs.org/
 npm config delete //npm.pkg.github.com/:_authToken
 
 echo "✅ Successfully published to GitHub Packages!"

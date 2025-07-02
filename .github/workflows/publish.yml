@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@cuongn265'
 
       - name: Enable Corepack (for Yarn)
         run: corepack enable
@@ -35,12 +33,10 @@ jobs:
         run: |
           sed -i 's/"name": "jira-to-branch"/"name": "@cuongn265\/jira-to-branch"/' package.json
 
-      - name: Configure npm for GitHub Packages
+      - name: Setup npm for GitHub Packages
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-          echo "@cuongn265:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+          npm config set registry https://npm.pkg.github.com/
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

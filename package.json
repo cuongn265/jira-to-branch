@@ -7,9 +7,6 @@
     "type": "git",
     "url": "https://github.com/cuongn265/jira-to-branch.git"
   },
-  "publishConfig": {
-    "@cuongn265:registry": "https://npm.pkg.github.com"
-  },
   "bin": {
     "jira-to-branch": "dist/index.js",
     "j2b": "dist/index.js"
