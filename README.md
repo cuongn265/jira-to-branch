@@ -106,6 +106,10 @@ jira-to-branch setup
 
 # Get help
 jira-to-branch --help
+
+# Create pull request
+j2b pr create
+jira-to-branch pr create
 ```
 
 ## 🌿 Branch Name Format
