@@ -119,7 +119,7 @@ export class AIService {
           }
         ],
         temperature: this.aiConfig.temperature,
-        max_tokens: this.aiConfig.maxTokens,
+        max_completion_tokens: this.aiConfig.maxTokens,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -211,7 +211,7 @@ Return only the branch suffix (no ticket ID):
           }
         ],
         temperature: this.aiConfig.summaryTemperature,
-        max_tokens: this.aiConfig.summaryMaxTokens,
+        max_completion_tokens: this.aiConfig.summaryMaxTokens,
       });
 
       const content = response.choices[0]?.message?.content?.trim();
@@ -235,7 +235,7 @@ Return only the branch suffix (no ticket ID):
       await this.openai.chat.completions.create({
         model: this.aiConfig.model,
         messages: [{ role: "user", content: "Hello" }],
-        max_tokens: 5,
+        max_completion_tokens: 5,
       });
       return true;
     } catch {
