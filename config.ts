@@ -13,7 +13,6 @@ interface Config {
   aiModel?: string;
   aiTemperature?: number;
   aiMaxTokens?: number;
-  ghToken?: string;
 }
 
 export const DEFAULT_AI_CONFIG = {
