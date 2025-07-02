@@ -6,16 +6,11 @@ export class PullRequestGenerator {
   private static readonly MAX_BRANCH_LENGTH = 50;
 
   static async generate(
-    ghToken?: string,
     openaiApiKey?: string
   ): Promise<string> {
     if (!openaiApiKey) {
       throw new Error('OpenAI API key is required for PR generation');
     }
-
-      if (!ghToken) {
-        throw new Error('Github token is required for PR generation');
-      }
 
     try {
       // Load configuration for AI settings
@@ -31,8 +26,30 @@ export class PullRequestGenerator {
         summaryTemperature: aiConfig.summaryTemperature,
       });
         
-      // Get the latest commit message
-      const commitMessage = execSync('git log --no-merges --pretty=format:"%s" -1', { encoding: 'utf8' }).trim();
+      // Get the base branch (usually main/master) to find commits unique to this branch
+      let baseBranch = 'main';
+      try {
+        const upstreamBranch = execSync('git rev-parse --abbrev-ref --symbolic-full-name @{u}', { encoding: 'utf8', stdio: 'pipe' }).trim();
+        baseBranch = upstreamBranch.split('/')[1] || 'main';
+      } catch {
+        // Fallback: try to determine the default branch
+        try {
+          const defaultBranch = execSync('git symbolic-ref refs/remotes/origin/HEAD', { encoding: 'utf8', stdio: 'pipe' }).trim();
+          baseBranch = defaultBranch.split('/').pop() || 'main';
+        } catch {
+          // Final fallback: assume main
+          baseBranch = 'main';
+        }
+      }
+      
+      // Get all commit messages from this branch only (excluding base branch commits)
+      const commitMessages = execSync(`git log --no-merges --pretty=format:"%s" ${baseBranch}..HEAD`, { encoding: 'utf8', stdio: 'pipe' }).trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      
+      // Split into array and reverse to get chronological order
+      const commitList = commitMessages.split('\n').filter(msg => msg.trim()).reverse();
+      
+      // Join all commit messages for AI processing
+      const commitMessage = commitList.join('\n');
       
       if (!commitMessage) {
         throw new Error('No commit message found');
@@ -48,40 +65,5 @@ export class PullRequestGenerator {
     } catch (error: any) {
       throw new Error(`AI branch generation failed: ${error.message}`);
     }
-  }
-
-  private static ensureValidLength(branchName: string): string {
-    if (branchName.length <= this.MAX_BRANCH_LENGTH) {
-      return branchName;
-    }
-
-    // Smart truncation: preserve ticket ID and truncate generative part
-    const parts = branchName.split('/');
-    const actualBranch = parts[parts.length - 1];
-    const prefix = parts.length > 1 ? parts.slice(0, -1).join('/') + '/' : '';
-
-    const [ticketId, ...generativeParts] = actualBranch.split('-');
-    const generativePart = generativeParts.join('-');
-
-    const maxGenerativeLength = this.MAX_BRANCH_LENGTH - prefix.length - ticketId.length - 1;
-    const truncatedGenerative = generativePart.substring(0, maxGenerativeLength);
-
-    return `${prefix}${ticketId}-${this.sanitizeBranchName(truncatedGenerative)}`;
-  }
-
-  private static sanitizeBranchName(branchName: string): string {
-    return branchName
-      // Replace invalid characters with hyphens
-      .replace(/[^a-zA-Z0-9\-_\/]/g, '-')
-      // Replace multiple consecutive hyphens with single hyphen
-      .replace(/-+/g, '-')
-      // Remove leading/trailing hyphens and slashes
-      .replace(/^[-\/]+|[-\/]+$/g, '')
-      // Ensure it doesn't start with a dot (hidden files)
-      .replace(/^\./, '')
-      // Ensure it doesn't end with .lock
-      .replace(/\.lock$/, '')
-      // Remove backticks (like `id` or `id`)
-      .replace(/`/g, '');
   }
 }

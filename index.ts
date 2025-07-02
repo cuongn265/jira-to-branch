@@ -107,12 +107,6 @@ async function setup() {
         return 'Max tokens must be between 1 and 4000';
       }
     },
-    {
-      type: 'password',
-      name: 'ghToken',
-      message: 'Github token (optional):',
-      default: config.ghToken || ''
-    }
   ]);
 
   await ConfigManager.save(answers);
@@ -274,9 +268,10 @@ async function createPr() {
     await checkGitRepository();
     const currentBranch = getCurrentBranch();
 
-    const prTitle = await PullRequestGenerator.generate(config.ghToken, config.openaiApiKey);
+  const prTitle = await PullRequestGenerator.generate(config.openaiApiKey);
+  info(prTitle);
 
-    execSync(`gh pr create --title "${prTitle}" --head ${currentBranch}`, { stdio: 'inherit' });
+    execSync(`gh pr create --title ${prTitle} --head ${currentBranch}`, { stdio: 'inherit' });
 }
 
 function checkGitHubCLI(): boolean {

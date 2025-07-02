@@ -229,7 +229,7 @@ Return only the branch suffix (no ticket ID):
 
     try {
       const prompt = `
-Generate a concise title for a Github PR based on the following git commit message:
+Generate a clear, meaningful, and concise title for a Github Pull Request based on the following git commit message:
 
 Commit Message: ${commitMessage}
 
@@ -240,9 +240,18 @@ Examples:
 - "Add payment integration API" → "Add payment integration API"
 - "Update database schema for users" → "Update database schema for users" 
 
+Requirements:
+- The title must be short, specific, and meaningful.
+- Do not include any special characters (e.g., ! @ # $ % ^ & * ( ) [ ] { } : ; , . / \ | ~ etc.).
+- Only use letters, numbers, and spaces.
+- Use proper English and keep the title relevant to the commit message.
+- Do not add extra details, prefixes, symbols, or formatting.
+- Return only the PR title as plain text. No explanations or additional output.
+
 Return only the PR title:
 `;
 
+      console.log(prompt);
       const response = await this.openai.chat.completions.create({
         model: this.aiConfig.model,
         messages: [
