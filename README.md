@@ -91,6 +91,10 @@ jira-to-branch create EH-1234 --analysis --prefix feature --yes
 jira-to-branch branch EH-1234
 # or
 jira-to-branch b EH-1234
+
+# Create pull request
+j2b pr create
+jira-to-branch pr create
 ```
 
 ### Configuration Commands
@@ -107,9 +111,6 @@ jira-to-branch setup
 # Get help
 jira-to-branch --help
 
-# Create pull request
-j2b pr create
-jira-to-branch pr create
 ```
 
 ## 🌿 Branch Name Format
