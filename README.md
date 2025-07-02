@@ -306,15 +306,13 @@ npm run publish:npm
 ```
 
 #### Manual GitHub Actions Trigger:
-- Go to [Actions tab](https://github.com/cuongn265/jira-to-branch/actions)
-- Select "Publish to GitHub Packages" workflow
-- Click "Run workflow" button
+Manual triggering has been disabled to ensure controlled releases. The workflow only runs when a GitHub Release is published.
 
 ### Publishing Workflow Triggers
 
 The GitHub Actions publish workflow (`.github/workflows/publish.yml`) runs when:
-- ✅ **GitHub Release is published** (recommended - fully automated)
-- ✅ **Manual workflow dispatch** from GitHub Actions UI
+- ✅ **GitHub Release is published** (only trigger - fully automated)
+- ❌ **NOT triggered by** manual workflow dispatch (disabled for security)
 - ❌ **NOT triggered by** just creating Git tags or running local scripts
 
 ### Important Notes:
