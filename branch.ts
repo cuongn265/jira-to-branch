@@ -103,6 +103,22 @@ export class BranchNameGenerator {
     const maxGenerativeLength = this.MAX_BRANCH_LENGTH - prefix.length - ticketId.length - 1;
     const truncatedGenerative = generativePart.substring(0, maxGenerativeLength);
 
-    return `${prefix}${ticketId}-${truncatedGenerative}`;
+    return `${prefix}${ticketId}-${this.sanitizeBranchName(truncatedGenerative)}`;
+  }
+
+  private static sanitizeBranchName(branchName: string): string {
+    return branchName
+      // Replace invalid characters with hyphens
+      .replace(/[^a-zA-Z0-9\-_\/]/g, '-')
+      // Replace multiple consecutive hyphens with single hyphen
+      .replace(/-+/g, '-')
+      // Remove leading/trailing hyphens and slashes
+      .replace(/^[-\/]+|[-\/]+$/g, '')
+      // Ensure it doesn't start with a dot (hidden files)
+      .replace(/^\./, '')
+      // Ensure it doesn't end with .lock
+      .replace(/\.lock$/, '')
+      // Remove backticks (like `id` or `id`)
+      .replace(/`/g, '');
   }
 }
