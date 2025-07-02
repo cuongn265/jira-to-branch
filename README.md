@@ -262,6 +262,71 @@ Uses OpenAI GPT-3.5-turbo with structured prompts for semantic analysis:
 - Meaningful technical terms prioritized
 - Action words emphasized
 
+## 📦 Version Management & Publishing
+
+### Bumping Version and Triggering Automated Publishing
+
+To release a new version that automatically triggers the GitHub Actions publish workflow:
+
+1. **Update package version** in `package.json`:
+   ```bash
+   # Manually edit package.json or use npm version command
+   npm version patch    # 1.0.2 → 1.0.3
+   npm version minor    # 1.0.3 → 1.1.0
+   npm version major    # 1.1.0 → 2.0.0
+   ```
+
+2. **Push changes to GitHub**:
+   ```bash
+   git push origin main --tags
+   ```
+
+3. **Create a GitHub Release** (⚡ This triggers the automated publish workflow):
+   - Go to [GitHub Releases](https://github.com/cuongn265/jira-to-branch/releases)
+   - Click "Create a new release"
+   - Choose the tag version (e.g., `v1.0.3`)
+   - Add release notes describing changes
+   - Click "Publish release"
+   - 🚀 **GitHub Actions will automatically publish to GitHub Packages**
+
+### Alternative Publishing Methods
+
+#### Manual Local Publishing:
+```bash
+# Publish to GitHub Packages locally (requires GITHUB_TOKEN)
+./publish-github.sh
+
+# Publish to NPM (optional)
+npm run publish:npm
+```
+
+#### Manual GitHub Actions Trigger:
+- Go to [Actions tab](https://github.com/cuongn265/jira-to-branch/actions)
+- Select "Publish to GitHub Packages" workflow
+- Click "Run workflow" button
+
+### Publishing Workflow Triggers
+
+The GitHub Actions publish workflow (`.github/workflows/publish.yml`) runs when:
+- ✅ **GitHub Release is published** (recommended - fully automated)
+- ✅ **Manual workflow dispatch** from GitHub Actions UI
+- ❌ **NOT triggered by** just creating Git tags or running local scripts
+
+### Important Notes:
+- **Creating a GitHub Release** is the recommended way to publish
+- Ensure the Git tag version matches the package.json version
+- The `npm version` command automatically creates a Git tag and commit
+- Always test the build before publishing: `npm run build`
+- GitHub Actions uses `GITHUB_TOKEN` automatically (no manual setup needed)
+- Local publishing with `./publish-github.sh` requires setting `GITHUB_TOKEN`
+
+### Version Synchronization:
+If Git tag and package versions get out of sync:
+1. Check current versions: `git tag --list` and check `package.json`
+2. Update `package.json` to match the latest Git tag
+3. Or create a new Git tag to match the package version
+4. Create a new GitHub Release to trigger automated publishing
+
 ## 🤝 Contributing
 
 1. Fork the repository
