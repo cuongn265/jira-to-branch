@@ -16,7 +16,7 @@ fi
 
 # Build the project
 echo "🔨 Building project..."
-npm run build
+yarn build
 
 # Create a temporary package.json with scoped name for GitHub Packages
 echo "📦 Creating scoped package for GitHub Packages..."

@@ -22,15 +22,23 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@cuongn265'
 
+      - name: Enable Corepack (for Yarn)
+        run: corepack enable
+
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Build
-        run: npm run build
+        run: yarn build
 
       - name: Update package name for GitHub Packages
         run: |
           sed -i 's/"name": "jira-to-branch"/"name": "@cuongn265\/jira-to-branch"/' package.json
+
+      - name: Configure npm for GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "@cuongn265:registry=https://npm.pkg.github.com/" >> ~/.npmrc
 
       - name: Publish to GitHub Packages
         run: npm publish
