@@ -7,6 +7,7 @@ import { JiraClient } from './jira';
 import { BranchNameGenerator } from './branch';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
+import { PullRequestGenerator } from './pull_request';
 
 // Import version from package.json
 const packageJson = require('../package.json');
@@ -105,7 +106,7 @@ async function setup() {
         if (input > 0 && input <= 4000) return true;
         return 'Max tokens must be between 1 and 4000';
       }
-    }
+    },
   ]);
 
   await ConfigManager.save(answers);
@@ -256,6 +257,33 @@ async function createBranch(input: string, options: any = {}) {
   }
 }
 
+async function createPr() {
+    if (!checkGitHubCLI()) {
+        error('GitHub CLI is not installed. Please install it from https://cli.github.com/');
+        return;
+    }
+
+    const config = await ensureConfig();
+    info('Connecting to github...');
+    await checkGitRepository();
+    const currentBranch = getCurrentBranch();
+
+    const prTitle = await PullRequestGenerator.generate(config.openaiApiKey);
+    execSync(`gh pr create --title "${prTitle}" --head ${currentBranch}`, { stdio: 'inherit' });
+    success(`Successfully created PR with title: ${prTitle}`);
+    info('Opening PR in browser...');
+    execSync(`gh pr view --web`, { stdio: 'inherit' });
+}
+
+function checkGitHubCLI(): boolean {
+  try {
+    execSync('gh --version', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Define CLI program
 program
   .name('jira-to-branch')
@@ -367,6 +395,11 @@ program
     console.log(`   Max Tokens: ${aiConfig.maxTokens}`);
     console.log('');
   });
+program
+  .command('pr')
+  .alias('c')
+  .description('Create a new PR')
+  .action(createPr);
 
 // Parse CLI arguments
 program.parse();

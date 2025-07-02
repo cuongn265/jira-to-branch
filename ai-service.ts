@@ -222,6 +222,59 @@ Return only the branch suffix (no ticket ID):
     }
   }
 
+  async generateGithubPrTitle(commitMessage: string): Promise<string | null> {
+    if (!this.isEnabled || !this.openai) {
+      return null;
+    }
+
+    try {
+      const prompt = `
+Generate a clear, meaningful, and concise title for a Github Pull Request based on the following git commit message:
+
+Commit Message: ${commitMessage}
+
+Examples:
+- "Fix user authentication bug" → "Fix user authentication bug"
+- "Add payment integration API" → "Add payment integration API"
+- "Update database schema for users" → "Update database schema for users" 
+- "Add payment integration API" → "Add payment integration API"
+- "Update database schema for users" → "Update database schema for users" 
+
+Requirements:
+- The title must be short, specific, and meaningful.
+- Do not include any special characters (e.g., ! @ # $ % ^ & * ( ) [ ] { } : ; , . / \ | ~ etc.).
+- Only use letters, numbers, and spaces.
+- Use proper English and keep the title relevant to the commit message.
+- Do not add extra details, prefixes, symbols, or formatting.
+- Return only the PR title as plain text. No explanations or additional output.
+
+Return only the PR title:
+`;
+
+      const response = await this.openai.chat.completions.create({
+        model: this.aiConfig.model,
+        messages: [
+          {
+            role: "system",
+            content: "You are a Git Pull Request naming expert. Generate concise, meaningful PR titles."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: this.aiConfig.summaryTemperature,
+        max_completion_tokens: this.aiConfig.summaryMaxTokens,
+      });
+
+      const content = response.choices[0]?.message?.content?.trim();
+      return content || null;
+    } catch (error: any) {
+      console.warn('OpenAI summary failed:', error.message);
+      return null;
+    }
+  }
+
   isAIEnabled(): boolean {
     return this.isEnabled;
   }
