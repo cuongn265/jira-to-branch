@@ -8,6 +8,7 @@ import { BranchNameGenerator } from './branch';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { PullRequestGenerator } from './pull_request';
+import * as readline from 'readline';
 
 // Import version from package.json
 const packageJson = require('../package.json');
@@ -18,6 +19,29 @@ const success = (msg: string) => console.log(chalk.green(`✓ ${msg}`));
 const error = (msg: string) => console.log(chalk.red(`✗ ${msg}`));
 const info = (msg: string) => console.log(chalk.blue(`ℹ ${msg}`));
 const warn = (msg: string) => console.log(chalk.yellow(`⚠ ${msg}`));
+
+// Helper function to get editable input with default value
+async function getEditableInput(prompt: string, defaultValue: string): Promise<string> {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    // Write prompt and default value
+    process.stdout.write(`   🌿 ${prompt}: `);
+
+    // Handle input
+    rl.on('line', (input) => {
+      rl.close();
+      const result = input.trim() || defaultValue;
+      resolve(result);
+    });
+
+    // Write default value to the terminal
+    rl.write(defaultValue);
+  });
+}
 
 async function ensureConfig(): Promise<any> {
   const config = await ConfigManager.load();
@@ -160,6 +184,15 @@ function getCurrentBranch(): string {
   }
 }
 
+function branchExists(branchName: string): boolean {
+  try {
+    execSync(`git rev-parse --verify "${branchName}" 2>/dev/null`, { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function createBranch(input: string, options: any = {}) {
   try {
     info('🚀 Starting AI-powered branch creation...\n');
@@ -229,30 +262,89 @@ async function createBranch(input: string, options: any = {}) {
     // Confirm branch creation unless --yes flag is provided
     if (!options.yes) {
       const currentBranch = getCurrentBranch();
-      console.log(`   📍 Current branch: ${chalk.yellow(currentBranch)}`);
+      console.log(`   📍 Current branch: ${chalk.yellow(currentBranch)}\n`);
 
-      const { confirm } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'confirm',
-        message: 'Create and switch to this branch?',
-        default: true
-      }]);
+      const finalBranchName = await getEditableInput('Branch name', branchName);
 
-      if (!confirm) {
-        info('Branch creation cancelled.');
+      // Validate branch name
+      if (finalBranchName.length === 0) {
+        error('Branch name cannot be empty');
         return;
+      }
+
+      if (!/^[a-zA-Z0-9\-_\/]+$/.test(finalBranchName)) {
+        error('Branch name can only contain alphanumeric characters, hyphens, underscores, and slashes');
+        return;
+      }
+
+      branchName = finalBranchName;
+
+      if (finalBranchName !== branchName) {
+        console.log(`   🌿 Updated branch: ${chalk.green(branchName)}`);
       }
     }
 
     // Create and checkout new branch
     info('Creating new branch...');
+
+    // Check if branch already exists
+    if (branchExists(branchName)) {
+      warn(`Branch '${branchName}' already exists`);
+
+      const { action } = await inquirer.prompt([{
+        type: 'list',
+        name: 'action',
+        message: 'What would you like to do?',
+        choices: [
+          { name: 'Checkout existing branch', value: 'checkout' },
+          { name: 'Create new branch with different name', value: 'rename' },
+          { name: 'Cancel', value: 'cancel' }
+        ]
+      }]);
+
+      if (action === 'cancel') {
+        info('Operation cancelled.');
+        return;
+      }
+
+      if (action === 'checkout') {
+        execSync(`git checkout "${branchName}"`);
+        success(`Switched to existing branch: ${branchName}`);
+        return;
+      }
+
+      if (action === 'rename') {
+        console.log('');
+        const newBranchName = await getEditableInput('New branch name', branchName);
+
+        if (newBranchName.length === 0) {
+          error('Branch name cannot be empty');
+          return;
+        }
+
+        if (!/^[a-zA-Z0-9\-_\/]+$/.test(newBranchName)) {
+          error('Branch name can only contain alphanumeric characters, hyphens, underscores, and slashes');
+          return;
+        }
+
+        if (branchExists(newBranchName)) {
+          error(`Branch '${newBranchName}' also already exists`);
+          return;
+        }
+
+        branchName = newBranchName;
+        info('Creating new branch...');
+      }
+    }
+
     execSync(`git checkout -b "${branchName}"`);
 
     success(`Successfully created and switched to branch: ${branchName}`);
     info(`You can now start working on ticket ${issueKey}!`);
 
-  } catch (error: any) {
-    error(`Failed to create branch: ${error.message}`);
+  } catch (e: any) {
+    console.log(e)
+    error(`Failed to create branch: ${e.message}`);
     process.exit(1);
   }
 }

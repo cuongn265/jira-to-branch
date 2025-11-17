@@ -1,6 +1,6 @@
 {
   "name": "jira-to-branch",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "🚀 AI-powered CLI tool to create Git branches from Jira tickets",
   "main": "dist/index.js",
   "repository": {
@@ -41,8 +41,8 @@
     "openai": "^4.24.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.0",
     "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.8.0",
     "typescript": "^5.2.0"
   },
   "engines": {
