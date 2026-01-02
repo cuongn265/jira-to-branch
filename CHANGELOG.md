@@ -5,6 +5,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] 2026-01-02
+
+### Added
+- **Multiple AI Provider Support**: Tool now supports multiple AI providers beyond OpenAI
+  - OpenAI (GPT-3.5, GPT-4, GPT-4o) - Default provider
+  - Anthropic (Claude 3.5 Sonnet, Haiku, Opus)
+  - Google (Gemini 1.5 Flash, Pro, 2.0)
+  - Azure OpenAI (Enterprise deployments)
+- **Generic AI Provider Architecture**: New abstraction layer for AI providers
+  - `AIProvider` base class for consistent interface
+  - Provider-specific implementations with dynamic loading
+  - Factory pattern for provider instantiation
+- **Provider Configuration**: New configuration options
+  - `aiProvider`: Select which AI service to use
+  - `aiApiKey`: Generic API key field (replaces provider-specific keys)
+  - `aiBaseURL`: Custom endpoint support (required for Azure)
+  - `aiOrganizationId`: Support for OpenAI organization accounts
+- **Comprehensive Documentation**:
+  - `AI_PROVIDERS.md`: Detailed guide for each provider
+  - `MIGRATION.md`: Migration guide for existing users
+  - `REFACTORING_SUMMARY.md`: Technical overview of changes
+  - `.jira-to-branch.example.json`: Example configuration file
+- **LangChain Integration**: Unified AI provider interface
+  - `@langchain/core` for core abstractions
+  - `@langchain/openai` for OpenAI provider
+  - `@langchain/anthropic` for Anthropic Claude
+  - `@langchain/google-genai` for Google Gemini
+  - All providers included in base installation
+
+### Changed
+- **AI Service Refactoring**: Completely refactored `ai-service.ts`
+  - Removed direct OpenAI client usage
+  - Implemented generic provider interface
+  - Updated all AI methods to use provider abstraction
+- **Configuration Structure**: Enhanced configuration management
+  - Added `DEFAULT_PROVIDER_MODELS` for default models per provider
+  - Updated `getAIConfig()` to handle provider-specific settings
+- **Error Messages**: Now include provider name for better debugging
+
+### Maintained
+- **Backward Compatibility**: Full backward compatibility maintained
+  - Legacy `openaiApiKey` still supported
+  - Automatically maps to new `aiProvider: "openai"` format
+  - No breaking changes for existing users
+- **All Existing Features**: All previous functionality preserved
+  - Branch creation workflow unchanged
+  - Git integration unchanged
+  - CLI commands unchanged
+
+### Technical Details
+- New file: `ai-providers.ts` - Provider abstraction layer using LangChain
+- LangChain provides unified interface for all AI providers
+- All provider SDKs included in base installation
+- TypeScript compilation successful with no errors
+
+### Benefits
+- **Simplicity**: Single installation includes all providers
+- **Flexibility**: Choose preferred AI provider based on needs
+- **Cost Optimization**: Different providers have different pricing models
+- **Reliability**: Fallback options if one provider has issues
+- **Future-Proof**: Easy to add new providers via LangChain
+- **Enterprise-Ready**: Support for Azure OpenAI deployments
+
 ## [1.0.8] - 2025-11-17
 
 ### Added
@@ -31,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Changes
 - Added `getEditableInput()` helper function for custom input prompts
 - Added `branchExists()` function to check if a branch is already present in the repository
-- Integrated Node.js `readline` module for better terminal interaction
+- Integrated Node.js `readline` module for better terminal **interaction**
 - Enhanced error handling for branch creation scenarios
 
 ### Improved User Experience
