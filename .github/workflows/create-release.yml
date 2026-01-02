@@ -27,7 +27,13 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           # Extract changelog between version headers and save to file
-          awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md | sed '1d;$d' > /tmp/release_notes.md
+          # Format: ## [VERSION] DATE
+          awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md | head -n -1 | tail -n +2 > /tmp/release_notes.md
+
+          # Debug: show extracted content
+          echo "=== Extracted Release Notes ==="
+          cat /tmp/release_notes.md
+          echo "=== End ==="
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

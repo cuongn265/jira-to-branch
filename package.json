@@ -17,7 +17,8 @@
     "dev": "tsc && node dist/index.js",
     "prepare": "npm run build",
     "clean": "rm -rf dist",
-    "install-global": "npm run build && npm link"
+    "install-global": "npm run build && npm link",
+    "postversion": "git push origin main --tags"
   },
   "keywords": [
     "jira",
