@@ -1,11 +1,11 @@
-name: Publish to GitHub Packages
+name: Publish Packages
 
 on:
   release:
     types: [published]
 
 jobs:
-  publish-gpr:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,24 +18,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
-      - name: Enable Corepack (for Yarn)
-        run: corepack enable
+          registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
-      - name: Update package name for GitHub Packages
-        run: |
-          sed -i 's/"name": "jira-to-branch"/"name": "@cuongn265\/jira-to-branch"/' package.json
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Setup npm for GitHub Packages
+      - name: Publish to GitHub Packages
         run: |
           npm config set registry https://npm.pkg.github.com/
           npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to GitHub Packages
-        run: npm publish
+          sed -i 's/"name": "jira-to-branch"/"name": "@cuongn265\/jira-to-branch"/' package.json
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
