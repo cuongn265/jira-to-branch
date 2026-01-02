@@ -1,0 +1,25 @@
+{
+  "jiraHost": "your-company.atlassian.net",
+  "jiraEmail": "your-email@company.com",
+  "jiraToken": "your-jira-api-token",
+  "githubToken": "ghp_your-github-token",
+  "defaultBranchPrefix": "feature",
+
+  "_comment_provider": "Choose from: openai, anthropic, google, azure",
+  "aiProvider": "openai",
+  "aiApiKey": "sk-...",
+  "aiModel": "gpt-4o-mini",
+
+  "_comment_optional": "Optional AI configuration",
+  "aiTemperature": 0.3,
+  "aiMaxTokens": 500,
+
+  "_comment_openai_org": "For OpenAI organization accounts (optional)",
+  "aiOrganizationId": "org-...",
+
+  "_comment_azure": "For Azure OpenAI (required if using Azure provider)",
+  "aiBaseURL": "https://YOUR_RESOURCE.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT",
+
+  "_comment_legacy": "Legacy config (for backward compatibility)",
+  "openaiApiKey": "sk-..."
+}

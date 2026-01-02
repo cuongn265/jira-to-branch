@@ -5,16 +5,18 @@
 [![License](https://img.shields.io/npm/l/jira-to-branch)](https://github.com/cuongn265/jira-to-branch/blob/main/LICENSE)
 [![Node.js](https://img.shields.io/node/v/jira-to-branch)](https://nodejs.org)
 
-An AI-powered CLI tool that creates meaningful Git branches from Jira tickets using OpenAI's advanced language models.
+An AI-powered CLI tool that creates meaningful Git branches from Jira tickets using multiple AI providers including OpenAI, Anthropic Claude, Google Gemini, and Azure OpenAI.
 
 ## ✨ Features
 
-- **🚀 OpenAI-Powered Generation**: Advanced AI analysis using OpenAI GPT-3.5-turbo for superior branch names
+- **🤖 Multiple AI Providers**: Support for OpenAI (GPT), Anthropic (Claude), Google (Gemini), and Azure OpenAI
+- **🚀 AI-Powered Generation**: Advanced AI analysis for superior branch names
+- **⚙️ Configurable Providers**: Easy switching between AI providers with custom models and settings
 - **📊 Multiple Input Formats**: Supports ticket IDs, browse URLs, and project URLs
 - **🎯 Smart Analysis**: Deep understanding of technical context and business requirements
 - **⚡ Git Integration**: Automatically creates and switches to new branches
 - **🎨 Beautiful Output**: Colorful, informative terminal experience with detailed ticket information
-- **⚙️ Flexible Configuration**: Easy setup with persistent configuration
+- **🔧 Flexible Configuration**: Easy setup with persistent configuration
 - **🔒 Secure**: Proper HTTPS validation and secure credential storage
 
 ## 📦 Installation
@@ -53,11 +55,14 @@ You'll be prompted for:
 - **Jira Host**: Your Jira instance (e.g., `company.atlassian.net`)
 - **Jira Email**: Your Jira account email
 - **Jira API Token**: Generate one at https://id.atlassian.com/manage-profile/security/api-tokens
-- **OpenAI API Key**: Get one at https://platform.openai.com/api-keys (required)
+- **AI Provider**: Choose from OpenAI, Anthropic, Google, or Azure (default: OpenAI)
+- **AI API Key**: API key for your chosen provider
 - **Default Branch Prefix**: Optional prefix for branches (e.g., `feature`, `bugfix`)
-- **AI Model**: Choose from GPT-3.5-turbo, GPT-4, GPT-4o, etc.
-- **AI Temperature**: Controls randomness (0.0-1.0, lower = more consistent)
-- **AI Max Tokens**: Maximum tokens for AI analysis (1-4000)
+- **AI Model**: Choose the model for your provider (e.g., gpt-4o-mini, claude-3-5-sonnet-20241022)
+- **AI Temperature**: Controls randomness (0.0-2.0, lower = more consistent)
+- **AI Max Tokens**: Maximum tokens for AI analysis
+
+> **💡 For detailed AI provider configuration**, see [AI_PROVIDERS.md](./AI_PROVIDERS.md)
 
 ## 🚀 Usage
 
@@ -174,11 +179,55 @@ Configuration is stored in `~/.jira-to-branch.json`:
   "jiraHost": "company.atlassian.net",
   "jiraEmail": "your-email@company.com",
   "jiraToken": "your-api-token",
-  "openaiApiKey": "sk-...",
+  "aiProvider": "openai",
+  "aiApiKey": "sk-...",
   "defaultBranchPrefix": "feature",
-  "aiModel": "gpt-3.5-turbo",
+  "aiModel": "gpt-4o-mini",
   "aiTemperature": 0.3,
   "aiMaxTokens": 500
+}
+```
+
+### AI Provider Configuration
+
+The tool supports multiple AI providers. See [AI_PROVIDERS.md](./AI_PROVIDERS.md) for detailed configuration instructions for each provider.
+
+**Quick Examples:**
+
+**OpenAI (Default):**
+```json
+{
+  "aiProvider": "openai",
+  "aiApiKey": "sk-...",
+  "aiModel": "gpt-4o-mini"
+}
+```
+
+**Anthropic Claude:**
+```json
+{
+  "aiProvider": "anthropic",
+  "aiApiKey": "sk-ant-...",
+  "aiModel": "claude-3-5-sonnet-20241022"
+}
+```
+
+**Google Gemini:**
+```json
+{
+  "aiProvider": "google",
+  "aiApiKey": "AIza...",
+  "aiModel": "gemini-1.5-flash"
+}
+```
+
+**Azure OpenAI:**
+```json
+{
+  "aiProvider": "azure",
+  "aiApiKey": "your-azure-key",
+  "aiModel": "gpt-4",
+  "aiBaseURL": "https://YOUR_RESOURCE.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT"
 }
 ```
 
@@ -190,16 +239,26 @@ Use the dedicated AI configuration command for fine-tuning:
 jira-to-branch ai-config
 ```
 
-**Available Models:**
-- `gpt-3.5-turbo` (recommended) - Fast and cost-effective
-- `gpt-4` - More accurate but slower and more expensive
-- `gpt-4-turbo-preview` - Latest GPT-4 with improved performance
-- `gpt-4o` - Optimized version of GPT-4
-- `gpt-4o-mini` - Smaller, faster version of GPT-4o
+**Supported Providers:**
+- `openai` (default) - GPT models (gpt-4o-mini, gpt-4o, gpt-3.5-turbo, etc.)
+- `anthropic` - Claude models (claude-3-5-sonnet-20241022, claude-3-5-haiku-20241022, etc.)
+- `google` - Gemini models (gemini-1.5-flash, gemini-1.5-pro, etc.)
+- `azure` - Azure OpenAI (requires baseURL configuration)
+
+**Available Models by Provider:**
+- **OpenAI**: `gpt-4o-mini` (recommended), `gpt-4o`, `gpt-3.5-turbo`, `gpt-4`
+- **Anthropic**: `claude-3-5-sonnet-20241022` (recommended), `claude-3-5-haiku-20241022`, `claude-3-opus-20240229`
+- **Google**: `gemini-1.5-flash` (recommended), `gemini-1.5-pro`, `gemini-2.0-flash-exp`
+- **Azure**: Model deployment names from your Azure configuration
 
 **Configuration Options:**
-- **Temperature**: Controls creativity vs consistency (0.0 = deterministic, 1.0 = creative)
+- **Provider**: Which AI service to use
+- **Temperature**: Controls creativity vs consistency (0.0 = deterministic, 2.0 = creative)
 - **Max Tokens**: Limits response length (higher = more detailed analysis)
+- **Base URL**: Custom endpoint (required for Azure, optional for others)
+- **Organization ID**: For OpenAI organization accounts
+
+> **💡 For detailed provider setup and cost comparison**, see [AI_PROVIDERS.md](./AI_PROVIDERS.md)
 
 ## 🛡️ Security & Reliability
 
@@ -235,10 +294,12 @@ jira-to-branch ai-config
 - Run the command from within a Git repository
 - Ensure Git is installed and configured
 
-**OpenAI API Issues**
-- Verify your OpenAI API key is valid
-- Check your OpenAI account has sufficient credits
-- Ensure network connectivity to OpenAI API
+**AI API Issues**
+- Verify your AI API key is valid for the selected provider
+- Check your account has sufficient credits
+- Ensure network connectivity to the AI provider's API
+- All providers are included via LangChain (no additional installation needed)
+- For Azure, ensure `aiBaseURL` is properly configured
 
 ### Debug Information:
 The tool provides detailed error messages and status updates for troubleshooting.
@@ -250,15 +311,20 @@ The tool provides detailed error messages and status updates for troubleshooting
 - **chalk**: Terminal color output
 - **commander**: CLI framework
 - **inquirer**: Interactive prompts
-- **openai**: OpenAI API integration
+- **LangChain**: Unified AI provider interface
+  - `@langchain/core`: Core abstractions
+  - `@langchain/openai`: OpenAI provider
+  - `@langchain/anthropic`: Anthropic provider
+  - `@langchain/google-genai`: Google Gemini provider
 - **TypeScript**: Type-safe development
 
 ### AI Analysis Process
-Uses OpenAI GPT-3.5-turbo with structured prompts for semantic analysis:
+Uses configurable AI providers with structured prompts for semantic analysis:
 - Analyzes ticket summary and description
 - Identifies primary actions and technical context
 - Generates concise, meaningful branch names
 - Ensures proper formatting and length constraints
+- Supports multiple AI providers for flexibility and cost optimization
 
 ### Branch Name Constraints
 - Maximum 50 characters total
