@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Get version from package.json
         id: version
@@ -25,36 +23,19 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Check if tag exists
-        id: tag-check
-        run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Extract changelog for this version
-        if: steps.tag-check.outputs.exists == 'false'
-        id: changelog
+      - name: Extract changelog section
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Extract section from changelog between version headers
-          CHANGELOG=$(awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md | sed '$d' | tail -n +2)
-          # Handle multiline output
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-          echo "body=$CHANGELOG" >> $GITHUB_OUTPUT
+          # Extract changelog between version headers and save to file
+          awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md | sed '1d;$d' > /tmp/release_notes.md
 
       - name: Create Release
-        if: steps.tag-check.outputs.exists == 'false'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          release_name: Release ${{ steps.version.outputs.version }}
-          body: ${{ steps.changelog.outputs.body }}
+          name: Release ${{ steps.version.outputs.version }}
+          body_path: /tmp/release_notes.md
           draft: false
-          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
